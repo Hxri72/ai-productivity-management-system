@@ -6,6 +6,7 @@ import AppLayout from "../components/layout/AppLayout";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
+import Tasks from "../pages/Tasks";
 import Loader from "../components/ui/Loader";
 
 const AppRouter = () => {
@@ -39,7 +40,7 @@ const AppRouter = () => {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* Phase 2+ routes will be added here */}
+          <Route path="/tasks" element={<Tasks />} />
         </Route>
 
         {/* Default redirect */}
