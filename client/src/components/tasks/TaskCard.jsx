@@ -6,6 +6,7 @@ import {
 } from "react-icons/hi";
 import { getPriorityConfig, getStatusConfig } from "../../utils/constants";
 import { getRelativeTime, isOverdue } from "../../utils/formatDate";
+import PriorityBadge from "../ai/PriorityBadge";
 
 const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
   const priorityConfig = getPriorityConfig(task.priority);
@@ -59,6 +60,13 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
             >
               {statusConfig.label}
             </button>
+
+            {task.aiPriority?.score && (
+              <PriorityBadge
+                score={task.aiPriority.score}
+                reasoning={task.aiPriority.reasoning}
+              />
+            )}
 
             <span className="text-xs text-gray-400 capitalize">
               {task.category}
