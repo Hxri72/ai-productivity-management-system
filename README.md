@@ -6,12 +6,11 @@ An intelligent task management and productivity tracking application that uses A
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React.js 19, Vite 8, Tailwind CSS 4, Zustand |
+| Frontend | React.js 19, Vite 8, Tailwind CSS 4, Zustand, Recharts |
 | Backend | Node.js, Express.js 5 |
 | Database | MongoDB, Mongoose ODM |
 | Authentication | JWT (Access + Refresh Tokens with rotation) |
 | AI Integration | OpenAI API (GPT-4o-mini) + Rule-based fallback |
-| Charts | Recharts |
 | Validation | Zod |
 | Logging | Winston |
 
@@ -24,8 +23,14 @@ An intelligent task management and productivity tracking application that uses A
 - [x] AI-Powered Task Prioritization (GPT-4o-mini + rule-based fallback)
 - [x] Smart Recommendations ("What should I work on next?")
 - [x] AI Usage Logs (token tracking, cost estimation, call history)
-- [ ] Productivity Analytics Dashboard
-- [ ] Notifications and Reminders
+- [x] Productivity Analytics Dashboard (7 chart types with Recharts)
+- [x] Notifications and Deadline Reminders
+- [x] Productivity Streak Tracking
+- [x] Settings (profile, working hours, notification preferences)
+
+## Screenshots
+
+> Add screenshots to the `assets/` folder and reference them here.
 
 ## Project Structure
 
@@ -35,12 +40,13 @@ ai-productivity-management-system/
 │   ├── src/
 │   │   ├── api/                   # Axios instance with interceptors
 │   │   ├── components/
-│   │   │   ├── ui/                # Reusable components (Loader, etc.)
-│   │   │   ├── layout/            # Sidebar, Navbar, AppLayout
+│   │   │   ├── ui/                # Loader
+│   │   │   ├── layout/            # Sidebar, Navbar (with notifications), AppLayout
 │   │   │   ├── tasks/             # TaskCard, TaskForm, TaskList, TaskFilters
-│   │   │   └── ai/               # PriorityBadge, AiSuggestions
-│   │   ├── pages/                 # Login, Register, Dashboard, Tasks, AiInsights
-│   │   ├── stores/                # Zustand stores (auth, task, ai)
+│   │   │   ├── ai/               # PriorityBadge, AiSuggestions
+│   │   │   └── analytics/        # ProductivityChart, TaskDistribution, PriorityChart, StreakTracker
+│   │   ├── pages/                 # Login, Register, Dashboard, Tasks, AiInsights, Analytics, Settings
+│   │   ├── stores/                # Zustand stores (auth, task, ai, analytics, notification)
 │   │   ├── routes/                # Router + ProtectedRoute
 │   │   ├── hooks/                 # Custom React hooks
 │   │   └── utils/                 # Constants, date formatting
@@ -51,12 +57,12 @@ ai-productivity-management-system/
 │   │   ├── middleware/            # Auth, validation, rate limiter, error handler
 │   │   ├── routes/                # API route definitions
 │   │   ├── controllers/           # Request handling
-│   │   ├── services/              # Business logic, AI integration, activity logging
-│   │   ├── models/                # Mongoose schemas (User, Task, Activity, AiLog)
+│   │   ├── services/              # Business logic, AI, analytics, notifications
+│   │   ├── models/                # Mongoose schemas (User, Task, Activity, AiLog, Notification)
 │   │   └── utils/                 # ApiError, ApiResponse, logger, constants
 │   └── server.js                  # Entry point
-├── docs/                          # Project documentation
-├── assets/                        # Screenshots and static assets
+├── docs/                          # Project documentation and reviews
+├── assets/                        # Screenshots for documentation
 ├── diagrams/                      # Architecture and flow diagrams
 ├── README.md
 ├── .gitignore
@@ -151,6 +157,27 @@ npm run dev
 | POST   | `/suggest`    | Private | Get smart recommendation + top 3 tasks          |
 | GET    | `/logs`       | Private | AI usage history (tokens, cost, latency)        |
 
+### Analytics (`/api/v1/analytics`)
+
+| Method | Endpoint          | Access  | Description                                    |
+|--------|-------------------|---------|------------------------------------------------|
+| GET    | `/overview`       | Private | Stats summary (streak, completion rate, overdue)|
+| GET    | `/productivity`   | Private | Daily completions (last N days)                |
+| GET    | `/categories`     | Private | Task distribution by category                  |
+| GET    | `/priorities`     | Private | Task distribution by priority                  |
+| GET    | `/trends`         | Private | Weekly completion trends (last 4 weeks)        |
+| GET    | `/accuracy`       | Private | Estimated vs actual time comparison            |
+| GET    | `/productive-day` | Private | Most productive day of week                    |
+
+### Notifications (`/api/v1/notifications`)
+
+| Method | Endpoint            | Access  | Description                        |
+|--------|---------------------|---------|------------------------------------|
+| GET    | `/`                 | Private | List notifications                 |
+| POST   | `/check-deadlines`  | Private | Generate deadline reminders        |
+| PATCH  | `/:id/read`         | Private | Mark notification as read          |
+| PATCH  | `/read-all`         | Private | Mark all as read                   |
+
 ## AI Architecture
 
 ```
@@ -191,7 +218,7 @@ Return scored tasks to frontend
 - **Request validation**: Zod schemas on all endpoints
 - **Rate limiting**: Stricter limits on auth routes, general limits on API
 - **Security**: Helmet, CORS, bcrypt (cost factor 12), no API keys on client
-- **MongoDB aggregation**: Task stats and AI cost summaries computed server-side
+- **MongoDB aggregation pipelines**: 7 analytics endpoints, task stats, AI cost summaries — all computed server-side
 - **Compound indexes**: `{ userId, status }`, `{ userId, dueDate }`, `{ userId, createdAt }` for efficient queries
 - **Activity tracking**: Every task mutation auto-logged to Activity collection for audit trail
 - **Debounced search**: 400ms debounce on frontend prevents API spam
@@ -200,12 +227,16 @@ Return scored tasks to frontend
 - **Prompt engineering**: Structured JSON output, low temperature, compact token-optimized input
 - **AI observability**: Every AI call logged with tokens, cost, latency, success/failure status
 - **Bulk operations**: `bulkWrite` for batch AI score updates (1 DB call instead of N)
+- **Recharts dashboard**: AreaChart, PieChart, BarChart with responsive containers
+- **Streak tracking**: Consecutive completion days calculated via aggregation
+- **Notification system**: Auto-generated deadline reminders with deduplication
 
 ## Documentation
 
 - [Project Design](docs/PROJECT_DESIGN.md) — Complete system architecture, database design, API design, and development roadmap
 - [Phase 2 Review](docs/PHASE2_REVIEW.md) — Task management testing, backend/frontend review, API test cases
 - [Phase 3 Review](docs/PHASE3_REVIEW.md) — AI architecture review, fallback engine analysis, prompt engineering, viva preparation
+- [Phase 4 Review](docs/PHASE4_REVIEW.md) — Analytics pipelines, notifications, settings, complete project summary
 
 ## License
 

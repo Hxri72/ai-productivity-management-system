@@ -8,6 +8,8 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Tasks from "../pages/Tasks";
 import AiInsights from "../pages/AiInsights";
+import Analytics from "../pages/Analytics";
+import Settings from "../pages/Settings";
 import Loader from "../components/ui/Loader";
 
 const AppRouter = () => {
@@ -43,6 +45,8 @@ const AppRouter = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/ai-suggest" element={<AiInsights />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
 
         {/* Default redirect */}
