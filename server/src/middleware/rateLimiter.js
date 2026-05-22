@@ -1,9 +1,15 @@
 import rateLimit from "express-rate-limit";
 
+const isDev = process.env.NODE_ENV === "development";
+
+// Skip rate limiting entirely in development
+const skip = () => isDev;
+
 // General API rate limiter
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === "development" ? 1000 : 100,
+  max: 100,
+  skip,
   message: {
     success: false,
     message: "Too many requests, please try again later.",
@@ -15,7 +21,8 @@ export const apiLimiter = rateLimit({
 // Stricter limiter for auth routes (login/register)
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === "development" ? 100 : 10,
+  max: 10,
+  skip,
   message: {
     success: false,
     message: "Too many login attempts, please try again after 15 minutes.",

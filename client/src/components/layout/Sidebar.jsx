@@ -19,7 +19,7 @@ const Sidebar = () => {
   return (
     <aside className="w-64 bg-white border-r border-gray-200 min-h-screen p-4 flex flex-col">
       <div className="mb-8 px-2">
-        <h1 className="text-xl font-bold text-indigo-600">AI Productivity</h1>
+        <h1 className="text-xl font-bold text-indigo-600">TaskFlow AI</h1>
         <p className="text-xs text-gray-400 mt-1">Manage. Prioritize. Achieve.</p>
       </div>
 
