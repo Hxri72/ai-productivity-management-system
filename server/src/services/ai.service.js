@@ -85,8 +85,17 @@ export const prioritizeTasks = async (userId) => {
     try {
       return await prioritizeWithAI(userId, tasks);
     } catch (error) {
-      logger.warn(`OpenAI call failed, using fallback: ${error.message}`);
-      return await prioritizeWithFallback(userId, tasks, true);
+      const statusCode = error.status || error.statusCode || "unknown";
+      const errorType = error.type || error.code || "unknown";
+      logger.warn(`OpenAI call failed [${statusCode} ${errorType}]: ${error.message}`);
+
+      // If rate limited, log the retry-after header
+      if (error.status === 429) {
+        const retryAfter = error.headers?.["retry-after"] || "unknown";
+        logger.warn(`Rate limited — retry after ${retryAfter}s`);
+      }
+
+      return await prioritizeWithFallback(userId, tasks, true, error.message);
     }
   }
 
@@ -214,7 +223,7 @@ Tasks: ${JSON.stringify(taskSummary)}`;
   };
 };
 
-const prioritizeWithFallback = async (userId, tasks, wasAIAttempted) => {
+const prioritizeWithFallback = async (userId, tasks, wasAIAttempted, errorReason = null) => {
   const startTime = Date.now();
 
   const bulkOps = tasks.map((task) => {
@@ -244,7 +253,7 @@ const prioritizeWithFallback = async (userId, tasks, wasAIAttempted) => {
     promptTokens: 0,
     completionTokens: 0,
     totalCost: 0,
-    inputSummary: `Fallback scoring for ${tasks.length} tasks`,
+    inputSummary: errorReason ? `AI error: ${errorReason.slice(0, 300)}` : `Fallback scoring for ${tasks.length} tasks`,
     outputSummary: "Rule-based scoring applied",
     latencyMs: Date.now() - startTime,
     success: true,
@@ -286,7 +295,8 @@ export const getRecommendations = async (userId) => {
     try {
       return await recommendWithAI(userId, tasks);
     } catch (error) {
-      logger.warn(`OpenAI recommendation failed, using fallback: ${error.message}`);
+      const statusCode = error.status || error.statusCode || "unknown";
+      logger.warn(`OpenAI recommendation failed [${statusCode}]: ${error.message}`);
       return recommendWithFallback(tasks);
     }
   }
